@@ -73,30 +73,36 @@ class Game {
 		}
 	}
 
-	public function mark($x, $y) {
-		if($this->isFull()) {
+	public function move($x, $y) {
+		if($this->isOver()) {
 			throw new Exception("This game is over already.");
 		}
 		if($this->symbol == EMPTY_SYMBOL) {
-			throw new Exception($this->player . ', you are not a player!');
+			throw new Exception('@' . $this->player . ', you are not a player!');
 		}
-		$pos = $x + $y * self::SIZE;
-		if($this->data['board'][$pos] != EMPTY_SYMBOL) {
+                if($this->player != $this->getNextPlayer()) {
+                        throw new Exception('@' . $this->player . ', not your turn.');
+                }
+		$board = $this->data['board'];
+		$pos = $x - 1 + ($y - 1) * self::SIZE; // zero base
+		if($board[$pos] != self::EMPTY_SYMBOL) {
 			throw new Exception("${x}, ${y} is already marked.");
 		}
-		$this->data['board'][$pos] = $this->symbol;
+		$board[$pos] = $this->symbol;
+		$this->data['board'] = $board;
 		$this->autoFillIfLast();
-		$entity = $this->datastore->entity($this->key, $this->data);
-		$this->datastore->upsert($entity);
+		$this->datastore->upsert($this->data);
 	}
 
 	private function autoFillIfLast() {
-		$values = array_count_values($this->data['board']);
+		$board = $this->data['board'];
+		$values = array_count_values($board);
 		if($values[self::EMPTY_SYMBOL] != 1) {
 			return;
 		}
-		$i = array_search(self::EMPTY_SYMBOL, $this->data['board']);
-		$this->data['board'][$i] = $values['O'] > $values['X'] ? 'X' : 'O';
+		$i = array_search(self::EMPTY_SYMBOL, $board);
+		$board[$i] = $values['O'] > $values['X'] ? 'X' : 'O';
+		$this->data['board'] = $board;
 	}
 
 	public function isOver() {
@@ -105,7 +111,20 @@ class Game {
 
 	public function isFull() {
 		$values = array_count_values($this->data['board']);
-		return count($values) == 2;
+		return !array_key_exists(self::EMPTY_SYMBOL, $values);
+	}
+
+	public function getNextPlayer() {
+		$values = array_count_values($this->data['board']);
+		switch(count($values)) {
+			case 1:
+				return $this->data['O'];
+			case 2:
+				return $this->data['X'];
+			default:
+				return $values['O'] > $values['X'] ? $this->data['X'] : $this->data['O'];
+		}
+		
 	}
 	
 	public function getWinner() {
@@ -123,8 +142,8 @@ class Game {
 		if(count($positions) < self::SIZE) {
 			return FALSE;
 		}
-		for($i = 0; $i < count($positions) - self::SIZE - 1; $i++) {
-			if(array_key_exists(serialize(array_slice($positions, $i, self::SIZE), self::$winning_positions))) {
+		for($i = 0; $i < count($positions) - self::SIZE + 1; $i++) {
+			if(array_key_exists(serialize(array_slice($positions, $i, self::SIZE)), self::$winning_positions)) {
 				return TRUE;
 			}
 		}

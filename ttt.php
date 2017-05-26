@@ -14,6 +14,13 @@ switch($command) {
                 $game->newGame();
 	case 'show':
 	default:
+		if(preg_match('/^([1-3])([1-3])$/', $command, $matches)) {
+			try {
+				$game->move($matches[1], $matches[2]);
+			} catch(Exception $e) {
+				echo $e->getMessage(), PHP_EOL;
+			}
+		}
 		show();
 }
 
@@ -21,14 +28,14 @@ function print_command_list() {
 	echo '```', PHP_EOL,
 	'new: start a new game', PHP_EOL,
 	'show: show the gameboard', PHP_EOL,
-	'(x),(y): mark the coordinate x,y', PHP_EOL,
+	'(x)(y): move to the coordinate \'x\' and \'y\'. x, y should in range of 1 to 3.', PHP_EOL,
 	'help: show this list', PHP_EOL,
 	'```', PHP_EOL;
 }
 
 function show() {
 	global $game;
-	echo '```', PHP_EOL;
+	echo PHP_EOL;
 	$game->printBoard();
 	echo PHP_EOL;
 	echo 'Player O: ', $game->data['O'], PHP_EOL;
@@ -36,11 +43,10 @@ function show() {
 	if ($game->isOver()) {
 		$winner = $game->getWinner();
 		echo 'Winner: ', !is_null($winner) ? $winner : 'Tie', PHP_EOL;
+	} else {
+		echo 'Next turn: @', $game->getNextPlayer(), PHP_EOL;
 	}
 	echo PHP_EOL;
 	echo 'Type \'/ttt new\' to start a new game', PHP_EOL;
-	echo 'Type \'/help\' for more information', PHP_EOL;
-	echo '```', PHP_EOL;
+	echo 'Type \'/ttt help\' for more information', PHP_EOL;
 }
-
-echo "hello world, ${user_name}@${channel_id}: ${text}";
