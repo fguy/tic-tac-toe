@@ -17,7 +17,7 @@ class Game {
 			'identifierType' => Key::TYPE_NAME
 		]);
 		$this->player = $player;
-		$this->data = $this->getData();
+		$this->initData();
 		if($this->data['O'] == $player) {
 			$this->symbol = 'O';
 		} elseif($this->data['X'] == $player) {
@@ -27,26 +27,33 @@ class Game {
 		}
 	}
 
-	private function getData() {
+	private function initData() {
 		$transaction = $this->datastore->transaction();
 		$entity = $transaction->lookup($this->key);
 		if(!is_null($entity)) {
 			if($entity['O'] != $this->player && is_null($entity['X'])) {
+				echo $this->player, ' joined to the game.', PHP_EOL;
 				$entity['X'] = $this->player;
 				$transaction->update($entity);
+				$transaction->commit();
 			}
+			$this->data = $entity;
 		} else {
-			$data = [
-				'O' => $this->player,
-				'X' => NULL,
-				'board' => array_fill(0, self::SIZE * self::SIZE, self::EMPTY_SYMBOL),
-				'started' => time(),
-			];
-			$entity = $this->datastore->entity($this->key, $data);
-			$transaction->insert($entity);
+			$this->newGame();
 		}
-		$transaction->commit();
-		return $entity;
+	}
+
+	public function newGame() {
+		echo $this->player, ' started new game.', PHP_EOL;
+                $data = [
+                        'O' => $this->player,
+                        'X' => NULL,
+                        'board' => array_fill(0, self::SIZE * self::SIZE, self::EMPTY_SYMBOL),
+                        'started' => time(),
+                ];
+                $entity = $this->datastore->entity($this->key, $data);
+		$this->datastore->upsert($entity);
+		$this->data = $entity;
 	}
 
 	public function get() {
