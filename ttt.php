@@ -14,13 +14,7 @@ switch($command) {
                 $game->newGame();
 	case 'show':
 	default:
-		if(preg_match('/^([1-3])([1-3])$/', $command, $matches)) {
-			try {
-				$game->move($matches[1], $matches[2]);
-			} catch(Exception $e) {
-				echo $e->getMessage(), PHP_EOL;
-			}
-		}
+		move();
 		show();
 }
 
@@ -35,18 +29,28 @@ function print_command_list() {
 
 function show() {
 	global $game;
-	echo PHP_EOL;
+	echo '```', PHP_EOL;
 	$game->printBoard();
-	echo PHP_EOL;
+	echo '```', PHP_EOL;
 	echo 'Player O: ', $game->data['O'], PHP_EOL;
 	echo 'Player X: ', ($game->data['X'] ? $game->data['X'] : '(Wait to join)'), PHP_EOL;
 	if ($game->isOver()) {
 		$winner = $game->getWinner();
-		echo 'Winner: ', !is_null($winner) ? $winner : 'Tie', PHP_EOL;
+		echo 'Winner: ', !is_null($winner) ? '@' . $winner : 'Tie', PHP_EOL;
 	} else {
 		echo 'Next turn: @', $game->getNextPlayer(), PHP_EOL;
 	}
 	echo PHP_EOL;
 	echo 'Type \'/ttt new\' to start a new game', PHP_EOL;
 	echo 'Type \'/ttt help\' for more information', PHP_EOL;
+}
+
+function move() {
+        if(preg_match('/^([1-3])([1-3])$/', $command, $matches)) {
+                try {
+                        $game->move($matches[1], $matches[2]);
+                } catch(Exception $e) {
+                        echo $e->getMessage(), PHP_EOL;
+                }
+        }
 }
