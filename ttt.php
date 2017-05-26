@@ -3,7 +3,8 @@ require_once './game.php';
 
 $user_name = $_POST['user_name'];
 $channel_id = $_POST['channel_id'];
-$command = strtolower(trim($_POST['text']));
+$args = explode(' ', strtolower(trim($_POST['text'])));
+$command = $args[0];
 $game = new Game($channel_id, $user_name);
 
 switch($command) {
@@ -11,7 +12,7 @@ switch($command) {
 		print_command_list();
 		break;
         case 'new':
-                $game->newGame();
+                $game->newGame($args[1]);
 	case 'show':
 	default:
 		move();
@@ -20,7 +21,7 @@ switch($command) {
 
 function print_command_list() {
 	echo '```', PHP_EOL,
-	'new: start a new game', PHP_EOL,
+	'new @username?: start a new game', PHP_EOL,
 	'show: show the gameboard', PHP_EOL,
 	'(x)(y): move to the coordinate \'x\' and \'y\'. x, y should in range of 1 to 3.', PHP_EOL,
 	'help: show this list', PHP_EOL,
@@ -46,6 +47,7 @@ function show() {
 }
 
 function move() {
+	global $command;
         if(preg_match('/^([1-3])([1-3])$/', $command, $matches)) {
                 try {
                         $game->move($matches[1], $matches[2]);

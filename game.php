@@ -43,11 +43,11 @@ class Game {
 		}
 	}
 
-	public function newGame() {
+	public function newGame($opponent = NULL) {
 		echo $this->player, ' started new game.', PHP_EOL;
                 $data = [
                         'O' => $this->player,
-                        'X' => NULL,
+                        'X' => $opponent,
                         'board' => array_fill(0, self::SIZE * self::SIZE, self::EMPTY_SYMBOL),
                         'started' => time(),
                 ];
