@@ -21,10 +21,10 @@ switch($command) {
 
 function print_command_list() {
 	echo '```', PHP_EOL,
-	'new @username?: start a new game', PHP_EOL,
-	'show: show the gameboard', PHP_EOL,
-	'(x)(y): move to the coordinate \'x\' and \'y\'. x, y should in range of 1 to 3.', PHP_EOL,
-	'help: show this list', PHP_EOL,
+	'/ttt new <username>?: start a new game', PHP_EOL,
+	'/ttt show: show the gameboard', PHP_EOL,
+	'/ttt <x><y>: move to the coordinate \'x\' and \'y\'. x, y should in range of 1 to 3.', PHP_EOL,
+	'/ttt help: show this list', PHP_EOL,
 	'```', PHP_EOL;
 }
 
